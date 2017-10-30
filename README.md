@@ -18,6 +18,7 @@ Install the browser extension [Postman](https://www.getpostman.com/). It allows 
 * **Content negotiation** - The process to ask for a specific encoding in the HTTP.
 * **WebSockets** - They are a powerful system for web servers to push notifications to web clients.
 * **JavaScripts** - It is a dynamic programming language where client-side scripts are able to process data asynchronously and alter the interfaces/pages being displayed.
+* **Node.js** - It provides event-driven structure that can write high-performance server-side web applications in, making our application be the server. On top of that, it also has package manager [npm](/npm.md).  
 
 ## Get's started
 
