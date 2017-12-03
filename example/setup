@@ -1,0 +1,97 @@
+SERVER="https://api.evrythng.com"
+EVRYTHNG_API_KEY="??????"
+
+curl -X POST "$SERVER/projects" \
+     -H "Authorization: $EVRYTHNG_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{ "name": "Web of Things", "description": "WoT Project" }' --verbose
+
+PROJECT_ID=?????
+
+curl -X POST "$SERVER/projects/$PROJECT_ID/applications" \
+     -H "Authorization: $EVRYTHNG_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{ "name": "WoT App", "description": "WoT Client Application", "tags":["WoT","device","LED"], "socialNetworks":{} }' 
+
+"appApiKey":"?????"
+APP_ID=?????
+
+curl -X POST "$SERVER/products?project=$PROJECT_ID" \
+     -H "Authorization: $EVRYTHNG_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{ "fn": "WoT Smart LED", "description": "A Web-connected Smart LED","tags":["WoT","device","LED"],"photos":["https://github.com/DerekYJC/Web-of-Things/blob/master/example/LED.JPG"] }'
+
+PRODUCT_ID=?????
+
+curl -X POST "$SERVER/thngs?project=$PROJECT_ID" \
+     -H "Authorization: $EVRYTHNG_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{ "name": "WoT LED", "product":"'$PRODUCT_ID'", "description": "Smart LED","tags":["WoT","device","LED","energy"] }' 
+
+THNG_ID=?????
+
+curl -X POST "$SERVER/auth/evrythng/thngs" \
+     -H "Authorization: $EVRYTHNG_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{ "thngId": "'$THNG_ID'" }' 
+{"thngId":"???","thngApiKey":"w?????"}
+THNG_API_KEY=???????
+
+curl -X POST "$SERVER/thngs/$THNG_ID/properties" \
+     -H "Authorization: $THNG_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '[
+        	{
+	          "key": "status",
+	          "value": true
+	        }
+	     ]'
+curl -X POST "$SERVER/thngs/$THNG_ID/properties" \
+     -H "Authorization: $THNG_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '[
+        	{
+	          "key": "on/off control",
+	          "value": false
+	        }
+	     ]'
+##Update the properties a few times ....
+##for i in {1..5} 
+##do 
+##	curl -X POST "$SERVER/thngs/$THNG_ID/properties" \
+##	     -H "Authorization: $THNG_API_KEY" \
+##	     -H "Content-Type: application/json" \
+##	     -d '[{"key": "voltage","value": '$(( $RANDOM%200 ))'},{"key": "current","value": '$(( $RANDOM%100 ))'},{"key": "power","value": '$(( $RANDOM%400 ))'}]'
+##	sleep 2     
+##done
+
+
+curl -X POST "$SERVER/actions/_setStatus?project=$PROJECT_ID" \
+     -H "Authorization: $EVRYTHNG_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{ "type": "_setStatus", "thng":"'$THNG_ID'", "customFields": {"status":false} }'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
