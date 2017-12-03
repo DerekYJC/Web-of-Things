@@ -44,7 +44,7 @@ echo '  "operatorApiKey":"'$EVRYTHNG_API_KEY'",' >> config.json
 curl -X POST "$SERVER/projects" \
      -H "Authorization: $EVRYTHNG_API_KEY" \
      -H "Content-Type: application/json" \
-     -d '{ "name": "Web of Things Book", "description": "My First WoT Project" }' > payloads/project.json
+     -d '{ "name": "Web of Things", "description": "WoT Project" }' > payloads/project.json
 
 # Parse the response to get the project ID
 PROJECT=`cat payloads/project.json`
@@ -121,7 +121,7 @@ echo '  "projectId":"'$PROJECT_ID'",' >> config.json
 curl -X POST "$SERVER/projects/$PROJECT_ID/applications" \
      -H "Authorization: $EVRYTHNG_API_KEY" \
      -H "Content-Type: application/json" \
-     -d '{ "name": "My Awesome WoT App", "description": "My First WoT Client Application","tags":["WoT","device","plug","energy"], "socialNetworks": {} }' > payloads/app.json
+     -d '{ "name": "Awesome WoT App", "description": "WoT Client Application","tags":["WoT","device","LED","energy"], "socialNetworks": {} }' > payloads/app.json
 
 # Parse the response to get the app ID and app API key
 APP=`cat payloads/app.json`
@@ -143,7 +143,7 @@ echo '  "appApiKey":"'$APP_API_KEY'",' >> config.json
 curl -X POST "$SERVER/products?project=$PROJECT_ID" \
      -H "Authorization: $EVRYTHNG_API_KEY" \
      -H "Content-Type: application/json" \
-     -d '{ "fn": "WoT Smart Plug", "description": "A Web-connected Smart Plug","tags":["WoT","device","energy"],"photos":["https://webofthings.github.io/files/plug.jpg"] }' > payloads/product.json
+     -d '{ "fn": "WoT Smart LED", "description": "A Web-connected Smart LED","tags":["WoT","device","LED"],"photos":["https://webofthings.github.io/files/plug.jpg"] }' > payloads/product.json
 
 # Parse the response to get the product ID
 PRODUCT=`cat payloads/product.json`
@@ -169,7 +169,7 @@ curl -X GET "$SERVER/products/$PRODUCT_ID?project=$PROJECT_ID" \
 curl -X POST "$SERVER/thngs?project=$PROJECT_ID" \
      -H "Authorization: $EVRYTHNG_API_KEY" \
      -H "Content-Type: application/json" \
-     -d '{ "name": "My WoT Plug", "product":"'$PRODUCT_ID'", "description": "My own Smart Plug","tags":["WoT","device","plug","energy"] }' > payloads/thng.json
+     -d '{ "name": "WoT LED", "product":"'$PRODUCT_ID'", "description": "My own Smart LED","tags":["WoT","device","LED","energy"] }' > payloads/thng.json
 
 
 # Parse the response to get the thng ID
