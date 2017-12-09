@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+  <script type="text/javascript">
+
+    function getParameterByName(name) {
+      name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+          results = regex.exec(location.search);
+      return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+    if (getParameterByName('key') != ""){
+      console.log('Get API key from query param:'+getParameterByName('key'))
+      key = getParameterByName('key');
+    }
+    if (getParameterByName('thngId') != ""){
+      console.log('Get thngId from query param:'+getParameterByName('thngId'));
+      thngId = getParameterByName('thngId');
+    }
+    if (getParameterByName('thngId2') != ""){
+      console.log('Get thngId_2 from query param:'+getParameterByName('thngId2'));
+      thngId_2 = getParameterByName('thngId2');
+    }
+    function getLocation() {
+      latitude = 0;
+      longitude = 0;
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+        console.log(" Loading geolocation")
+      } else { 
+        x.innerHTML = "Geolocation is not supported by this browser.";
+      }
+    }
+    function showPosition(position) {
+      console.log(" You are here: ("+position.coords.latitude+","+position.coords.longitude+")");
+      latitude = position.coords.latitude;
+      longitude = position.coords.longitude;
+    }
+    $(window).bind("load", function() {
+      getLocation()
+    });
+
+    </script>
+
+  <title>Web of Thing Controller</title>
+
+  <style class="anchorjs"></style><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
+  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
+
+  <!-- Documentation extras -->
+  <link href="./files/docs.min.css" rel="stylesheet">
+
+  <!-- Import D3 -->
+  <style>
+    svg {
+      font: 10px sans-serif;
+    }
+    .line {
+      fill: none;
+      stroke: #000;
+      stroke-width: 1.5px;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Docs page layout -->
+  <div class="bs-docs-header" id="content" tabindex="-1">
+    <div class="container">
+      <h1>Web Thing Controller</h1>
+      <p>Control Web of Things via EVRYTHNG</p>
+    </div>
+  </div>
+
+  <div class="container bs-docs-container">
+    <div class="row">
+      <div class="col-md-6" id="the-list" role="main">
+        
+	<div class="bs-docs-section">
+
+          <h2>My WoT LED 1</h2>
+
+	  <hr>
+
+	  <h3>Actions</h3>
+          <div>
+   	    <h5>_setStatus</h5>
+	    <input type="checkbox" id="toggle-status"/>
+
+	    <script>
+	      $(function() {
+                $('#toggle-status').bootstrapToggle({
+                  on: 'On',
+                  off: 'Off'
+                });
+              });
+              $(function() {
+                $('#toggle-status').change(function() {
+                  sendAction("_setStatus",{"status": $(this).prop('checked')});
+                });
+              });
+            </script>
+
+          </div>
+
+	  <h5>Response</h5>
+
+          <div class="panel-group" id="accordion">
+            <div class="panel panel-default" id="panel2">
+              <div class="panel-heading">
+                <h4 class="panel-title">DEBUG (Show HTTP Response)</h4>
+              </div>
+              <div id="response" class="panel-body"> 
+                <pre></pre> 
+              </div> 
+            </div>
+          </div>
+
+	  <hr>
+
+	  <h3>Properties</h3>
+
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span id="value-status" class="badge">false</span>
+              status
+            </li>
+          </ul>
+
+	  <script>
+
+	    var url = 'wss://ws.evrythng.com:443/thngs/'+thngId+'/properties?access_token='+key;
+	    var socket = new WebSocket(url); //#A 
+	    socket.onmessage = function (message) { //#B
+  	      var content = JSON.parse(message.data);
+  	      console.log('Property update : ', content[0]); //#C
+  	      $('#value-'+content[0].key).html( content[0].value ); //#E 
+	    };
+	    socket.onerror = function (error) {
+    	      console.log('An error occurred while trying to connect to a WebSocket!');
+    	      console.log(error);
+	    };
+//#A Subscribes to all properties of this Thng (via secure WebSockets) 
+//#B Each time we receive a WS message, this will be called 
+//#C We parse the message content (note: it's an array!)
+//#D Call this to update the power graph (function not shown)
+//#E Use the property name to update the badge 
+ 
+            </script>
+
+	    <script>
+
+	      function sendAction(type,value){ 
+  	        console.log(" You are here: ("+latitude+","+longitude+")");
+  		$.ajax({ 
+      		  url: 'https://api.evrythng.com/actions/'+type+'?access_token='+key,//#A
+      		  dataType: 'json', //#B
+      		  type: 'post', //#B
+      		  contentType: 'application/json', //#B
+      		  data: JSON.stringify({"type": type, "thng": thngId, "customFields":value,"location":{"position":{"type": "Point","coordinates": [longitude, latitude]}},"locationSource":"sensor"}), //#C
+      		  processData: false, 
+      		  success: function( data, textStatus, jQxhr ){ //#D
+          	    $('#response pre').html( JSON.stringify( data ) ); 
+      		  }, 
+      		  error: function( jqXhr, textStatus, errorThrown ){//#E 
+          	    console.log( errorThrown ); 
+      		  } 
+  		});
+	      }
+//#A The custom actions endpoint in EVRYTHNG
+//#B We POST a JSON document
+//#C The payload to POST 
+//#D If successful, update the "response" html element
+//#E If an error, display in the console
+
+            </script>
+
+        </div>
+
+      </div>
+
+      <div class="col-md-6" id="the-list" role="main">
+        
+	<div class="bs-docs-section">
+
+          <h2>My WoT LED 2</h2>
+
+	  <hr>
+
+	  <h3>Actions</h3>
+          <div>
+   	    <h5>_setStatus</h5>
+	    <input type="checkbox" id="toggle-status_2"/>
+
+	    <script>
+	      $(function() {
+                $('#toggle-status_2').bootstrapToggle({
+                  on: 'On',
+                  off: 'Off'
+                });
+              });
+              $(function() {
+                $('#toggle-status_2').change(function() {
+                  sendAction_2("_setStatus",{"status": $(this).prop('checked')});
+                });
+              });
+            </script>
+
+          </div>
+
+	  <h5>Response</h5>
+
+          <div class="panel-group" id="accordion">
+            <div class="panel panel-default" id="panel2">
+              <div class="panel-heading">
+                <h4 class="panel-title">DEBUG (Show HTTP Response)</h4>
+              </div>
+              <div id="response_2" class="panel-body"> 
+                <pre></pre> 
+              </div> 
+            </div>
+          </div>
+
+	  <hr>
+
+	  <h3>Properties</h3>
+
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span id="value-status_2" class="badge">false</span>
+              status
+            </li>
+          </ul>
+
+	  <script>
+
+	    var url_2 = 'wss://ws.evrythng.com:443/thngs/'+thngId_2+'/properties?access_token='+key;
+	    var socket_2 = new WebSocket(url_2); 
+	    socket_2.onmessage = function (message) { 
+  	      var content_2 = JSON.parse(message.data);
+  	      console.log('Property update : ', content_2[0]); 
+  	      $('#value-'+content_2[0].key+'_2').html( content_2[0].value ); 
+	    };
+	    socket.onerror = function (error) {
+    	      console.log('An error occurred while trying to connect to a WebSocket!');
+    	      console.log(error);
+	    };
+ 
+            </script>
+
+	    <script>
+		
+	      function sendAction_2(type,value){ 
+  	        console.log(" You are here: ("+latitude+","+longitude+")");
+  		$.ajax({ 
+      		  url: 'https://api.evrythng.com/actions/'+type+'?access_token='+key,
+      		  dataType: 'json', 
+      		  type: 'post', 
+      		  contentType: 'application/json', 
+      		  data: JSON.stringify({"type": type, "thng": thngId_2, "customFields":value,"location":{"position":{"type": "Point","coordinates": [longitude, latitude]}},"locationSource":"sensor"}), 
+      		  processData: false, 
+      		  success: function( data, textStatus, jQxhr ){ 
+          	    $('#response_2 pre').html( JSON.stringify( data ) ); 
+      		  }, 
+      		  error: function( jqXhr, textStatus, errorThrown ){
+          	    console.log( errorThrown ); 
+      		  } 
+  		});
+	      }
+
+            </script>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <footer class="bs-docs-footer" role="contentinfo">
+      <div class="container">
+
+        <p>Built with the amazing D3, Bootstrap, and bootstraptoggle.</p>
+
+      </div>
+    </footer>
+
+  
+  </div>
+
+</body>
+
+</html>
+
+
+
+
+
+
