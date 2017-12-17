@@ -57,6 +57,7 @@
 
   <!-- Documentation extras -->
   <link href="./files/docs.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
   <!-- Import D3 -->
   <style>
@@ -94,7 +95,7 @@
         
 	<div class="bs-docs-section">
 
-          <h2>My WoT LED 1</h2>
+          <h2>My WoT LED 1 <i id="led1" class="fa fa-circle" style="font-size:36px;color:grey"></i> </h2>
 
 	  <hr>
 
@@ -143,6 +144,137 @@
             </li>
           </ul>
 
+          <svg class="chart"></svg>
+
+	  <script>
+
+	    var myVar = setInterval(runupdate, 1000);
+
+	    function runupdate() {
+	      var vs = document.getElementById("value-status").innerHTML;
+	      if (vs === "true") {
+		 updateCharts("status", 1);
+	      } else if (vs === "false") {
+		 updateCharts("status", 0);
+	      };
+	    }
+		
+            var n = 40,
+              random = d3.random.normal(0, 0),
+              data = d3.range(n).map(random);
+
+            var margin = {top: 40, right: 40, bottom: 40, left: 50},
+              width = $( "#the-list" ).width() - margin.left - margin.right,
+              height = 200 - margin.top - margin.bottom;
+
+            var x = d3.scale.linear()
+              .domain([0, n - 1])
+              .range([0, width]);
+
+            var y = d3.scale.linear()
+              .domain([0, 1.5])
+              .range([height, 0]);
+
+            var line = d3.svg.line()
+              .x(function(d, i) { return x(i); })
+              .y(function(d, i) { return y(d); });
+
+            var svg = d3.select(".chart")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("defs").append("clipPath")
+              .attr("id", "clip")
+              .append("rect")
+              .attr("width", width)
+              .attr("height", height);
+
+            svg.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + y(0) + ")")
+              .call(d3.svg.axis().scale(x).orient("bottom"));
+
+            svg.append("g")
+              .attr("class", "y axis")
+              .call(d3.svg.axis().scale(y).orient("left"));
+
+            var path = svg.append("g")
+              .attr("clip-path", "url(#clip)")
+              .append("path")
+              .datum(data)
+              .attr("class", "line")
+              .attr("d", line);
+
+            function resize() {
+
+
+              // Computes the new dimensions
+              var width = $( "#the-list" ).width() - margin.left - margin.right,
+              height = 200 - margin.top - margin.bottom;
+
+              x = d3.scale.linear()
+                .domain([0, n - 1])
+                .range([0, width]);  
+
+              // Removes the existing graph
+              svg.selectAll("*").remove();
+              
+
+              // Redraws the existing graph
+              svg.attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+              svg.append("defs").append("clipPath")
+                .attr("id", "clip")
+                .append("rect")
+                .attr("width", width)
+                .attr("height", height);
+
+              svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + y(0) + ")")
+                .call(d3.svg.axis().scale(x).orient("bottom"));
+
+              svg.append("g")
+                .attr("class", "y axis")
+                .call(d3.svg.axis().scale(y).orient("left"));
+
+              var path = svg.append("g")
+                .attr("clip-path", "url(#clip)")
+                .append("path")
+                .datum(data)
+                .attr("class", "line")
+                .attr("d", line);
+
+            }
+
+            d3.select(window).on('resize', resize); 
+
+            function updateCharts(key, value) {
+
+              // push a new data point onto the back
+              data.push(value);
+
+              // redraw line and slide it to the left
+              path
+                .attr("d", line)
+                .attr("transform", null)
+                .transition()
+                .duration(500)
+                .ease("linear")
+                .attr("transform", "translate(" + x(-1) + ",0)")
+
+              data.shift();
+
+            }
+
+            </script>
+          
+
 	  <script>
 
 	    var url = 'wss://ws.evrythng.com:443/thngs/'+thngId+'/properties?access_token='+key;
@@ -150,7 +282,18 @@
 	    socket.onmessage = function (message) { //#B
   	      var content = JSON.parse(message.data);
   	      console.log('Property update : ', content[0]); //#C
-  	      $('#value-'+content[0].key).html( content[0].value ); //#E 
+	      if (content[0].key === 'status') {
+  	        $('#value-'+content[0].key).html( content[0].value ); //#E 
+	        if (content[0].value === true) {
+		  updateCharts("status", 1);
+	 	  document.getElementById("value-status").innerHTML = "true";
+		  document.getElementById("led1").style.color = "LawnGreen";
+	        } else if (content[0].value === false) {
+		  updateCharts("status", 0);
+		  document.getElementById("value-status").innerHTML = "false";
+		  document.getElementById("led1").style.color = "grey";
+	        }
+	      }
 	    };
 	    socket.onerror = function (error) {
     	      console.log('An error occurred while trying to connect to a WebSocket!');
@@ -199,7 +342,7 @@
         
 	<div class="bs-docs-section">
 
-          <h2>My WoT LED 2</h2>
+          <h2>My WoT LED 2 <i id="led2" class="fa fa-circle" style="font-size:36px;color:grey"></i></h2>
 
 	  <hr>
 
@@ -255,7 +398,16 @@
 	    socket_2.onmessage = function (message) { 
   	      var content_2 = JSON.parse(message.data);
   	      console.log('Property update : ', content_2[0]); 
-  	      $('#value-'+content_2[0].key+'_2').html( content_2[0].value ); 
+	      if (content_2[0].key === 'status') {
+  	        $('#value-'+content_2[0].key+'_2').html( content_2[0].value ); 
+	        if (content_2[0].value === true) {
+		  document.getElementById("value-status_2").innerHTML = "true";
+		  document.getElementById("led2").style.color = "LawnGreen";
+	        } else if (content_2[0].value === false) {
+		  document.getElementById("value-status_2").innerHTML = "false";
+		  document.getElementById("led2").style.color = "grey";
+	        }
+	      }
 	    };
 	    socket.onerror = function (error) {
     	      console.log('An error occurred while trying to connect to a WebSocket!');
