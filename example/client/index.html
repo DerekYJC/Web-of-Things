@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+  <script type="text/javascript">
+
+    function getParameterByName(name) {
+      name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+          results = regex.exec(location.search);
+      return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+    if (getParameterByName('key') != ""){
+      console.log('Get API key from query param:'+getParameterByName('key'))
+      key = getParameterByName('key');
+    }
+    if (getParameterByName('thngId') != ""){
+      console.log('Get thngId from query param:'+getParameterByName('thngId'));
+      thngId = getParameterByName('thngId');
+    }
+    if (getParameterByName('thngId2') != ""){
+      console.log('Get thngId_2 from query param:'+getParameterByName('thngId2'));
+      thngId_2 = getParameterByName('thngId2');
+    }
+    if (getParameterByName('thngId3') != ""){
+      console.log('Get thngId_3 from query param:'+getParameterByName('thngId3'));
+      thngId_3 = getParameterByName('thngId3');
+    }
+    if (getParameterByName('thngId4') != ""){
+      console.log('Get thngId_4 from query param:'+getParameterByName('thngId4'));
+      thngId_4 = getParameterByName('thngId4');
+    }
+    if (getParameterByName('thngId5') != ""){
+      console.log('Get thngId_5 from query param:'+getParameterByName('thngId5'));
+      thngId_5 = getParameterByName('thngId5');
+    }
+    if (getParameterByName('thngId6') != ""){
+      console.log('Get thngId_6 from query param:'+getParameterByName('thngId6'));
+      thngId_6 = getParameterByName('thngId6');
+    }
+    if (getParameterByName('thngId7') != ""){
+      console.log('Get thngId_7 from query param:'+getParameterByName('thngId7'));
+      thngId_7 = getParameterByName('thngId7');
+    }
+    if (getParameterByName('thngId8') != ""){
+      console.log('Get thngId_8 from query param:'+getParameterByName('thngId8'));
+      thngId_8 = getParameterByName('thngId8');
+    }
+    function getLocation() {
+      latitude = 0;
+      longitude = 0;
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+        console.log(" Loading geolocation")
+      } else { 
+        x.innerHTML = "Geolocation is not supported by this browser.";
+      }
+    }
+    function showPosition(position) {
+      console.log(" You are here: ("+position.coords.latitude+","+position.coords.longitude+")");
+      latitude = position.coords.latitude;
+      longitude = position.coords.longitude;
+    }
+    $(window).bind("load", function() {
+      getLocation()
+    });
+
+    </script>
+
+  <title>Web of Thing Controller</title>
+
+  <style class="anchorjs"></style><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
+  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
+
+  <!-- Documentation extras -->
+  <link href="./files/docs.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <!-- Import D3 -->
+  <style>
+    svg {
+      font: 10px sans-serif;
+    }
+    .line {
+      fill: none;
+      stroke: #000;
+      stroke-width: 1.5px;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Docs page layout -->
+  <div class="bs-docs-header" id="content" tabindex="-1">
+    <div class="container">
+      <h1>Web Thing Controller</h1>
+      <p>Control Web of Things via EVRYTHNG</p>
+    </div>
+  </div>
+
+  <div class="container bs-docs-container">
+    <div class="row">
+      <div class="col-md-6" id="the-list" role="main">
+        
+	<div class="bs-docs-section">
+
+          <h2>WoT LED 1 <i id="led1" class="fa fa-circle" style="font-size:36px;color:grey"></i> </h2>
+
+	  <hr>
+
+	  <h3>Actions</h3>
+          <div>
+   	    <h5>_setStatus</h5>
+	    <input type="checkbox" id="toggle-status"/>
+
+	    <script>
+	      $(function() {
+                $('#toggle-status').bootstrapToggle({
+                  on: 'On',
+                  off: 'Off'
+                });
+              });
+              $(function() {
+                $('#toggle-status').change(function() {
+                  sendAction("_setStatus",{"status": $(this).prop('checked')});
+                });
+              });
+            </script>
+
+          </div>
+
+	  
+
+	  <hr>
+
+	  <h3>Properties</h3>
+
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span id="value-status" class="badge">false</span>
+              status
+            </li>
+          </ul>
+
+          <svg class="chart"></svg>
+
+	  <script>
+
+	    var myVar = setInterval(runupdate, 1000);
+
+	    function runupdate() {
+	      var vs = document.getElementById("value-status").innerHTML;
+	      if (vs === "true") {
+		 updateCharts("status", 1);
+	      } else if (vs === "false") {
+		 updateCharts("status", 0);
+	      };
+	    }
+		
+            var n = 40,
+              random = d3.random.normal(0, 0),
+              data = d3.range(n).map(random);
+
+            var margin = {top: 40, right: 40, bottom: 40, left: 50},
+              width = $( "#the-list" ).width() - margin.left - margin.right,
+              height = 200 - margin.top - margin.bottom;
+
+            var x = d3.scale.linear()
+              .domain([0, n - 1])
+              .range([0, width]);
+
+            var y = d3.scale.linear()
+              .domain([0, 1.5])
+              .range([height, 0]);
+
+            var line = d3.svg.line()
+              .x(function(d, i) { return x(i); })
+              .y(function(d, i) { return y(d); });
+
+            var svg = d3.select(".chart")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("defs").append("clipPath")
+              .attr("id", "clip")
+              .append("rect")
+              .attr("width", width)
+              .attr("height", height);
+
+            svg.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + y(0) + ")")
+              .call(d3.svg.axis().scale(x).orient("bottom"));
+
+            svg.append("g")
+              .attr("class", "y axis")
+              .call(d3.svg.axis().scale(y).orient("left"));
+
+            var path = svg.append("g")
+              .attr("clip-path", "url(#clip)")
+              .append("path")
+              .datum(data)
+              .attr("class", "line")
+              .attr("d", line);
+
+            function resize() {
+
+
+              // Computes the new dimensions
+              var width = $( "#the-list" ).width() - margin.left - margin.right,
+              height = 200 - margin.top - margin.bottom;
+
+              x = d3.scale.linear()
+                .domain([0, n - 1])
+                .range([0, width]);  
+
+              // Removes the existing graph
+              svg.selectAll("*").remove();
+              
+
+              // Redraws the existing graph
+              svg.attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+              svg.append("defs").append("clipPath")
+                .attr("id", "clip")
+                .append("rect")
+                .attr("width", width)
+                .attr("height", height);
+
+              svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + y(0) + ")")
+                .call(d3.svg.axis().scale(x).orient("bottom"));
+
+              svg.append("g")
+                .attr("class", "y axis")
+                .call(d3.svg.axis().scale(y).orient("left"));
+
+              var path = svg.append("g")
+                .attr("clip-path", "url(#clip)")
+                .append("path")
+                .datum(data)
+                .attr("class", "line")
+                .attr("d", line);
+
+            }
+
+            d3.select(window).on('resize', resize); 
+
+            function updateCharts(key, value) {
+
+              // push a new data point onto the back
+              data.push(value);
+
+              // redraw line and slide it to the left
+              path
+                .attr("d", line)
+                .attr("transform", null)
+                .transition()
+                .duration(500)
+                .ease("linear")
+                .attr("transform", "translate(" + x(-1) + ",0)")
+
+              data.shift();
+
+            }
+
+            </script>
+          
+
+	  <script>
+
+	    var url = 'wss://ws.evrythng.com:443/thngs/'+thngId+'/properties?access_token='+key;
+	    var socket = new WebSocket(url); //#A 
+	    socket.onmessage = function (message) { //#B
+  	      var content = JSON.parse(message.data);
+  	      console.log('Property update : ', content[0]); //#C
+	      if (content[0].key === 'status') {
+  	        $('#value-'+content[0].key).html( content[0].value ); //#E 
+	        if (content[0].value === true) {
+		  updateCharts("status", 1);
+	 	  document.getElementById("value-status").innerHTML = "true";
+		  document.getElementById("led1").style.color = "LawnGreen";
+	        } else if (content[0].value === false) {
+		  updateCharts("status", 0);
+		  document.getElementById("value-status").innerHTML = "false";
+		  document.getElementById("led1").style.color = "grey";
+	        }
+	      }
+	    };
+	    socket.onerror = function (error) {
+    	      console.log('An error occurred while trying to connect to a WebSocket!');
+    	      console.log(error);
+	    };
+//#A Subscribes to all properties of this Thng (via secure WebSockets) 
+//#B Each time we receive a WS message, this will be called 
+//#C We parse the message content (note: it's an array!)
+//#D Call this to update the power graph (function not shown)
+//#E Use the property name to update the badge 
+ 
+            </script>
+
+	    <script>
+
+	      function sendAction(type,value){ 
+  	        console.log(" You are here: ("+latitude+","+longitude+")");
+  		$.ajax({ 
+      		  url: 'https://api.evrythng.com/actions/'+type+'?access_token='+key,//#A
+      		  dataType: 'json', //#B
+      		  type: 'post', //#B
+      		  contentType: 'application/json', //#B
+      		  data: JSON.stringify({"type": type, "thng": thngId, "customFields":value,"location":{"position":{"type": "Point","coordinates": [longitude, latitude]}},"locationSource":"sensor"}), //#C
+      		  processData: false, 
+      		  success: function( data, textStatus, jQxhr ){ //#D
+          	    $('#response pre').html( JSON.stringify( data ) ); 
+      		  }, 
+      		  error: function( jqXhr, textStatus, errorThrown ){//#E 
+          	    console.log( errorThrown ); 
+      		  } 
+  		});
+	      }
+//#A The custom actions endpoint in EVRYTHNG
+//#B We POST a JSON document
+//#C The payload to POST 
+//#D If successful, update the "response" html element
+//#E If an error, display in the console
+
+            </script>
+
+        </div>
+
+      </div>
+
+      <div class="col-md-6" id="the-list_2" role="main">
+        
+	<div class="bs-docs-section">
+
+          <h2>WoT LED 2 <i id="led2" class="fa fa-circle" style="font-size:36px;color:grey"></i></h2>
+
+	  <hr>
+
+	  <h3>Actions</h3>
+          <div>
+   	    <h5>_setStatus</h5>
+	    <input type="checkbox" id="toggle-status_2"/>
+
+	    <script>
+	      $(function() {
+                $('#toggle-status_2').bootstrapToggle({
+                  on: 'On',
+                  off: 'Off'
+                });
+              });
+              $(function() {
+                $('#toggle-status_2').change(function() {
+                  sendAction_2("_setStatus",{"status": $(this).prop('checked')});
+                });
+              });
+            </script>
+
+          </div>
+
+	 
+
+	  <hr>
+
+	  <h3>Properties</h3>
+
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span id="value-status_2" class="badge">false</span>
+              status
+            </li>
+          </ul>
+
+	  <svg class="chart2"></svg>
+
+	  <script>
+
+	    var myVar2 = setInterval(runupdate2, 1000);
+
+	    function runupdate2() {
+	      var vs = document.getElementById("value-status_2").innerHTML;
+	      if (vs === "true") {
+		 updateCharts_2("status", 1);
+	      } else if (vs === "false") {
+		 updateCharts_2("status", 0);
+	      };
+	    }
+		
+            var n2 = 40,
+              random2 = d3.random.normal(0, 0),
+              data2 = d3.range(n2).map(random2);
+
+            var margin2 = {top: 40, right: 40, bottom: 40, left: 50},
+              width2 = $( "#the-list_2" ).width() - margin2.left - margin2.right,
+              height2 = 200 - margin2.top - margin2.bottom;
+
+            var x2 = d3.scale.linear()
+              .domain([0, n2 - 1])
+              .range([0, width2]);
+
+            var y2 = d3.scale.linear()
+              .domain([0, 1.5])
+              .range([height2, 0]);
+
+            var line2 = d3.svg.line()
+              .x(function(d, i) { return x2(i); })
+              .y(function(d, i) { return y2(d); });
+
+            var svg2 = d3.select(".chart2")
+              .attr("width", width2 + margin2.left + margin2.right)
+              .attr("height", height2 + margin2.top + margin2.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+            svg2.append("defs").append("clipPath")
+              .attr("id", "clip2")
+              .append("rect")
+              .attr("width", width2)
+              .attr("height", height2);
+
+            svg2.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + y2(0) + ")")
+              .call(d3.svg.axis().scale(x2).orient("bottom"));
+
+            svg2.append("g")
+              .attr("class", "y axis")
+              .call(d3.svg.axis().scale(y2).orient("left"));
+
+            var path2 = svg2.append("g")
+              .attr("clip-path", "url(#clip2)")
+              .append("path")
+              .datum(data2)
+              .attr("class", "line")
+              .attr("d", line2);
+
+            function resize2() {
+
+
+              // Computes the new dimensions
+              var width2 = $( "#the-list_2" ).width() - margin2.left - margin2.right,
+              height2 = 200 - margin2.top - margin2.bottom;
+
+              x2 = d3.scale.linear()
+                .domain([0, n - 1])
+                .range([0, width2]);  
+
+              // Removes the existing graph
+              svg2.selectAll("*").remove();
+              
+
+              // Redraws the existing graph
+              svg2.attr("width", width2 + margin2.left + margin2.right)
+                .attr("height", height2 + margin2.top + margin2.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+              svg2.append("defs").append("clipPath")
+                .attr("id", "clip2")
+                .append("rect")
+                .attr("width", width2)
+                .attr("height", height2);
+
+              svg2.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + y2(0) + ")")
+                .call(d3.svg.axis().scale(x2).orient("bottom"));
+
+              svg2.append("g")
+                .attr("class", "y axis")
+                .call(d3.svg.axis().scale(y2).orient("left"));
+
+              var path2 = svg2.append("g")
+                .attr("clip-path", "url(#clip2)")
+                .append("path")
+                .datum(data2)
+                .attr("class", "line")
+                .attr("d", line2);
+
+            }
+
+            d3.select(window).on('resize', resize2); 
+
+            function updateCharts_2(key, value) {
+
+              // push a new data point onto the back
+              data2.push(value);
+
+              // redraw line and slide it to the left
+              path2
+                .attr("d", line2)
+                .attr("transform", null)
+                .transition()
+                .duration(500)
+                .ease("linear")
+                .attr("transform", "translate(" + x2(-1) + ",0)")
+
+              data2.shift();
+
+            }
+
+            </script>
+
+	  <script>
+
+	    var url_2 = 'wss://ws.evrythng.com:443/thngs/'+thngId_2+'/properties?access_token='+key;
+	    var socket_2 = new WebSocket(url_2); 
+	    socket_2.onmessage = function (message) { 
+  	      var content_2 = JSON.parse(message.data);
+  	      console.log('Property update : ', content_2[0]); 
+	      if (content_2[0].key === 'status') {
+  	        $('#value-'+content_2[0].key+'_2').html( content_2[0].value ); 
+	        if (content_2[0].value === true) {
+		  document.getElementById("value-status_2").innerHTML = "true";
+		  document.getElementById("led2").style.color = "LawnGreen";
+	        } else if (content_2[0].value === false) {
+		  document.getElementById("value-status_2").innerHTML = "false";
+		  document.getElementById("led2").style.color = "grey";
+	        }
+	      }
+	    };
+	    socket_2.onerror = function (error) {
+    	      console.log('An error occurred while trying to connect to a WebSocket!');
+    	      console.log(error);
+	    };
+ 
+            </script>
+
+	    <script>
+		
+	      function sendAction_2(type,value){ 
+  	        console.log(" You are here: ("+latitude+","+longitude+")");
+  		$.ajax({ 
+      		  url: 'https://api.evrythng.com/actions/'+type+'?access_token='+key,
+      		  dataType: 'json', 
+      		  type: 'post', 
+      		  contentType: 'application/json', 
+      		  data: JSON.stringify({"type": type, "thng": thngId_2, "customFields":value,"location":{"position":{"type": "Point","coordinates": [longitude, latitude]}},"locationSource":"sensor"}), 
+      		  processData: false, 
+      		  success: function( data, textStatus, jQxhr ){ 
+          	    $('#response_2 pre').html( JSON.stringify( data ) ); 
+      		  }, 
+      		  error: function( jqXhr, textStatus, errorThrown ){
+          	    console.log( errorThrown ); 
+      		  } 
+  		});
+	      }
+
+            </script>
+
+        </div>
+
+      </div>  
+
+    </div>
+
+    <br>
+    <br>
+
+    <div class="row">
+      <div class="col-md-6" id="the-list_3" role="main">
+        
+	<div class="bs-docs-section">
+
+          <h2>WoT LED 3 <i id="led3" class="fa fa-circle" style="font-size:36px;color:grey"></i> </h2>
+
+	  <hr>
+
+	  <h3>Actions</h3>
+          <div>
+   	    <h5>_setStatus</h5>
+	    <input type="checkbox" id="toggle-status_3"/>
+
+	    <script>
+	      $(function() {
+                $('#toggle-status_3').bootstrapToggle({
+                  on: 'On',
+                  off: 'Off'
+                });
+              });
+              $(function() {
+                $('#toggle-status_3').change(function() {
+                  sendAction_3("_setStatus",{"status": $(this).prop('checked')});
+                });
+              });
+            </script>
+
+          </div>
+
+	  
+
+	  <hr>
+
+	  <h3>Properties</h3>
+
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span id="value-status_3" class="badge">false</span>
+              status
+            </li>
+          </ul>
+
+          <svg class="chart3"></svg>
+
+	  <script>
+
+	    var myVar3 = setInterval(runupdate3, 1000);
+
+	    function runupdate3() {
+	      var vs = document.getElementById("value-status_3").innerHTML;
+	      if (vs === "true") {
+		 updateCharts_3("status", 1);
+	      } else if (vs === "false") {
+		 updateCharts_3("status", 0);
+	      };
+	    }
+		
+            var n3 = 40,
+              random3 = d3.random.normal(0, 0),
+              data3 = d3.range(n3).map(random3);
+
+            var margin3 = {top: 40, right: 40, bottom: 40, left: 50},
+              width3 = $( "#the-list_3" ).width() - margin3.left - margin3.right,
+              height3 = 200 - margin3.top - margin3.bottom;
+
+            var x3 = d3.scale.linear()
+              .domain([0, n - 1])
+              .range([0, width3]);
+
+            var y3 = d3.scale.linear()
+              .domain([0, 1.5])
+              .range([height3, 0]);
+
+            var line3 = d3.svg.line()
+              .x(function(d, i) { return x3(i); })
+              .y(function(d, i) { return y3(d); });
+
+            var svg3 = d3.select(".chart3")
+              .attr("width", width3 + margin3.left + margin3.right)
+              .attr("height", height3 + margin3.top + margin3.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin3.left + "," + margin3.top + ")");
+
+            svg3.append("defs").append("clipPath")
+              .attr("id", "clip3")
+              .append("rect")
+              .attr("width", width3)
+              .attr("height", height3);
+
+            svg3.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + y3(0) + ")")
+              .call(d3.svg.axis().scale(x3).orient("bottom"));
+
+            svg3.append("g")
+              .attr("class", "y axis")
+              .call(d3.svg.axis().scale(y3).orient("left"));
+
+            var path3 = svg3.append("g")
+              .attr("clip-path", "url(#clip3)")
+              .append("path")
+              .datum(data3)
+              .attr("class", "line")
+              .attr("d", line3);
+
+            function resize3() {
+
+
+              // Computes the new dimensions
+              var width3 = $( "#the-list_3" ).width() - margin3.left - margin3.right,
+              height3 = 200 - margin3.top - margin3.bottom;
+
+              x3 = d3.scale.linear()
+                .domain([0, n - 1])
+                .range([0, width]);  
+
+              // Removes the existing graph
+              svg3.selectAll("*").remove();
+              
+
+              // Redraws the existing graph
+              svg3.attr("width", width3 + margin3.left + margin3.right)
+                .attr("height", height3 + margin3.top + margin3.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin3.left + "," + margin3.top + ")");
+
+              svg3.append("defs").append("clipPath")
+                .attr("id", "clip3")
+                .append("rect")
+                .attr("width", width3)
+                .attr("height", height3);
+
+              svg3.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + y3(0) + ")")
+                .call(d3.svg.axis().scale(x3).orient("bottom"));
+
+              svg3.append("g")
+                .attr("class", "y axis")
+                .call(d3.svg.axis().scale(y3).orient("left"));
+
+              var path3 = svg3.append("g")
+                .attr("clip-path", "url(#clip3)")
+                .append("path")
+                .datum(data3)
+                .attr("class", "line")
+                .attr("d", line3);
+
+            }
+
+            d3.select(window).on('resize', resize3); 
+
+            function updateCharts_3(key, value) {
+
+              // push a new data point onto the back
+              data3.push(value);
+
+              // redraw line and slide it to the left
+              path3
+                .attr("d", line3)
+                .attr("transform", null)
+                .transition()
+                .duration(500)
+                .ease("linear")
+                .attr("transform", "translate(" + x3(-1) + ",0)")
+
+              data3.shift();
+
+            }
+
+            </script>
+          
+
+	  <script>
+
+	    var url_3 = 'wss://ws.evrythng.com:443/thngs/'+thngId_3+'/properties?access_token='+key;
+	    var socket_3 = new WebSocket(url_3); 
+	    socket_3.onmessage = function (message) { 
+  	      var content_3 = JSON.parse(message.data);
+  	      console.log('Property update : ', content_3[0]); 
+	      if (content_3[0].key === 'status') {
+  	        $('#value-'+content_3[0].key+'_3').html( content_3[0].value ); 
+	        if (content_3[0].value === true) {
+		  updateCharts_3("status", 1);
+	 	  document.getElementById("value-status_3").innerHTML = "true";
+		  document.getElementById("led3").style.color = "LawnGreen";
+	        } else if (content_3[0].value === false) {
+		  updateCharts_3("status", 0);
+		  document.getElementById("value-status_3").innerHTML = "false";
+		  document.getElementById("led3").style.color = "grey";
+	        }
+	      }
+	    };
+	    socket_3.onerror = function (error) {
+    	      console.log('An error occurred while trying to connect to a WebSocket!');
+    	      console.log(error);
+	    };
+ 
+            </script>
+
+	    <script>
+
+	      function sendAction_3(type,value){ 
+  	        console.log(" You are here: ("+latitude+","+longitude+")");
+  		$.ajax({ 
+      		  url: 'https://api.evrythng.com/actions/'+type+'?access_token='+key,
+      		  dataType: 'json', 
+      		  type: 'post', 
+      		  contentType: 'application/json', 
+      		  data: JSON.stringify({"type": type, "thng": thngId_3, "customFields":value,"location":{"position":{"type": "Point","coordinates": [longitude, latitude]}},"locationSource":"sensor"}), 
+      		  processData: false, 
+      		  success: function( data, textStatus, jQxhr ){ 
+          	    $('#response_3 pre').html( JSON.stringify( data ) ); 
+      		  }, 
+      		  error: function( jqXhr, textStatus, errorThrown ){
+          	    console.log( errorThrown ); 
+      		  } 
+  		});
+	      }
+
+            </script>
+
+        </div>
+
+      </div>
+
+      <div class="col-md-6" id="the-list_4" role="main">
+        
+	<div class="bs-docs-section">
+
+          <h2>WoT LED 4 <i id="led4" class="fa fa-circle" style="font-size:36px;color:grey"></i></h2>
+
+	  <hr>
+
+	  <h3>Actions</h3>
+          <div>
+   	    <h5>_setStatus</h5>
+	    <input type="checkbox" id="toggle-status_4"/>
+
+	    <script>
+	      $(function() {
+                $('#toggle-status_4').bootstrapToggle({
+                  on: 'On',
+                  off: 'Off'
+                });
+              });
+              $(function() {
+                $('#toggle-status_4').change(function() {
+                  sendAction_4("_setStatus",{"status": $(this).prop('checked')});
+                });
+              });
+            </script>
+
+          </div>
+
+	  
+
+	  <hr>
+
+	  <h3>Properties</h3>
+
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span id="value-status_4" class="badge">false</span>
+              status
+            </li>
+          </ul>
+
+	  <svg class="chart4"></svg>
+
+	  <script>
+
+	    var myVar4 = setInterval(runupdate4, 1000);
+
+	    function runupdate4() {
+	      var vs = document.getElementById("value-status_4").innerHTML;
+	      if (vs === "true") {
+		 updateCharts_4("status", 1);
+	      } else if (vs === "false") {
+		 updateCharts_4("status", 0);
+	      };
+	    }
+		
+            var n4 = 40,
+              random4 = d3.random.normal(0, 0),
+              data4 = d3.range(n4).map(random4);
+
+            var margin4 = {top: 40, right: 40, bottom: 40, left: 50},
+              width4 = $( "#the-list_4" ).width() - margin4.left - margin4.right,
+              height4 = 200 - margin4.top - margin4.bottom;
+
+            var x4 = d3.scale.linear()
+              .domain([0, n4 - 1])
+              .range([0, width4]);
+
+            var y4 = d3.scale.linear()
+              .domain([0, 1.5])
+              .range([height4, 0]);
+
+            var line4 = d3.svg.line()
+              .x(function(d, i) { return x4(i); })
+              .y(function(d, i) { return y4(d); });
+
+            var svg4 = d3.select(".chart4")
+              .attr("width", width4 + margin4.left + margin4.right)
+              .attr("height", height4 + margin4.top + margin4.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin4.left + "," + margin4.top + ")");
+
+            svg4.append("defs").append("clipPath")
+              .attr("id", "clip4")
+              .append("rect")
+              .attr("width", width4)
+              .attr("height", height4);
+
+            svg4.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + y4(0) + ")")
+              .call(d3.svg.axis().scale(x4).orient("bottom"));
+
+            svg4.append("g")
+              .attr("class", "y axis")
+              .call(d3.svg.axis().scale(y4).orient("left"));
+
+            var path4 = svg4.append("g")
+              .attr("clip-path", "url(#clip4)")
+              .append("path")
+              .datum(data4)
+              .attr("class", "line")
+              .attr("d", line4);
+
+            function resize4() {
+
+
+              // Computes the new dimensions
+              var width4 = $( "#the-list_4" ).width() - margin4.left - margin4.right,
+              height4 = 200 - margin4.top - margin4.bottom;
+
+              x4 = d3.scale.linear()
+                .domain([0, n4 - 1])
+                .range([0, width4]);  
+
+              // Removes the existing graph
+              svg4.selectAll("*").remove();
+              
+
+              // Redraws the existing graph
+              svg4.attr("width", width4 + margin4.left + margin4.right)
+                .attr("height", height4 + margin4.top + margin4.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin4.left + "," + margin4.top + ")");
+
+              svg4.append("defs").append("clipPath")
+                .attr("id", "clip4")
+                .append("rect")
+                .attr("width", width4)
+                .attr("height", height4);
+
+              svg4.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + y4(0) + ")")
+                .call(d3.svg.axis().scale(x4).orient("bottom"));
+
+              svg4.append("g")
+                .attr("class", "y axis")
+                .call(d3.svg.axis().scale(y4).orient("left"));
+
+              var path4 = svg4.append("g")
+                .attr("clip-path", "url(#clip4)")
+                .append("path")
+                .datum(data4)
+                .attr("class", "line")
+                .attr("d", line4);
+
+            }
+
+            d3.select(window).on('resize', resize4); 
+
+            function updateCharts_4(key, value) {
+
+              // push a new data point onto the back
+              data4.push(value);
+
+              // redraw line and slide it to the left
+              path4
+                .attr("d", line4)
+                .attr("transform", null)
+                .transition()
+                .duration(500)
+                .ease("linear")
+                .attr("transform", "translate(" + x4(-1) + ",0)")
+
+              data4.shift();
+
+            }
+
+            </script>
+
+	  <script>
+
+	    var url_4 = 'wss://ws.evrythng.com:443/thngs/'+thngId_4+'/properties?access_token='+key;
+	    var socket_4 = new WebSocket(url_4); 
+	    socket_4.onmessage = function (message) { 
+  	      var content_4 = JSON.parse(message.data);
+  	      console.log('Property update : ', content_4[0]); 
+	      if (content_4[0].key === 'status') {
+  	        $('#value-'+content_4[0].key+'_4').html( content_4[0].value ); 
+	        if (content_4[0].value === true) {
+		  document.getElementById("value-status_4").innerHTML = "true";
+		  document.getElementById("led4").style.color = "LawnGreen";
+	        } else if (content_4[0].value === false) {
+		  document.getElementById("value-status_4").innerHTML = "false";
+		  document.getElementById("led4").style.color = "grey";
+	        }
+	      }
+	    };
+	    socket_4.onerror = function (error) {
+    	      console.log('An error occurred while trying to connect to a WebSocket!');
+    	      console.log(error);
+	    };
+ 
+            </script>
+
+	    <script>
+		
+	      function sendAction_4(type,value){ 
+  	        console.log(" You are here: ("+latitude+","+longitude+")");
+  		$.ajax({ 
+      		  url: 'https://api.evrythng.com/actions/'+type+'?access_token='+key,
+      		  dataType: 'json', 
+      		  type: 'post', 
+      		  contentType: 'application/json', 
+      		  data: JSON.stringify({"type": type, "thng": thngId_4, "customFields":value,"location":{"position":{"type": "Point","coordinates": [longitude, latitude]}},"locationSource":"sensor"}), 
+      		  processData: false, 
+      		  success: function( data, textStatus, jQxhr ){ 
+          	    $('#response_4 pre').html( JSON.stringify( data ) ); 
+      		  }, 
+      		  error: function( jqXhr, textStatus, errorThrown ){
+          	    console.log( errorThrown ); 
+      		  } 
+  		});
+	      }
+
+            </script>
+
+        </div>
+
+      </div>   
+
+    </div>
+
+    <br>
+    <br>
+
+    <div class="row">
+      <div class="col-md-6" id="the-list_5" role="main">
+        
+	<div class="bs-docs-section">
+
+          <h2>WoT LED 5 <i id="led5" class="fa fa-circle" style="font-size:36px;color:grey"></i> </h2>
+
+	  <hr>
+
+	  <h3>Actions</h3>
+          <div>
+   	    <h5>_setStatus</h5>
+	    <input type="checkbox" id="toggle-status_5"/>
+
+	    <script>
+	      $(function() {
+                $('#toggle-status_5').bootstrapToggle({
+                  on: 'On',
+                  off: 'Off'
+                });
+              });
+              $(function() {
+                $('#toggle-status_5').change(function() {
+                  sendAction_5("_setStatus",{"status": $(this).prop('checked')});
+                });
+              });
+            </script>
+
+          </div>
+
+	  
+
+	  <hr>
+
+	  <h3>Properties</h3>
+
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span id="value-status_5" class="badge">false</span>
+              status
+            </li>
+          </ul>
+
+          <svg class="chart5"></svg>
+
+	  <script>
+
+	    var myVar5 = setInterval(runupdate5, 1000);
+
+	    function runupdate5() {
+	      var vs = document.getElementById("value-status_5").innerHTML;
+	      if (vs === "true") {
+		 updateCharts_5("status", 1);
+	      } else if (vs === "false") {
+		 updateCharts_5("status", 0);
+	      };
+	    }
+		
+            var n5 = 40,
+              random5 = d3.random.normal(0, 0),
+              data5 = d3.range(n5).map(random5);
+
+            var margin5 = {top: 40, right: 40, bottom: 40, left: 50},
+              width5 = $( "#the-list_5" ).width() - margin5.left - margin5.right,
+              height5 = 200 - margin5.top - margin5.bottom;
+
+            var x5 = d3.scale.linear()
+              .domain([0, n5 - 1])
+              .range([0, width5]);
+
+            var y5 = d3.scale.linear()
+              .domain([0, 1.5])
+              .range([height5, 0]);
+
+            var line5 = d3.svg.line()
+              .x(function(d, i) { return x5(i); })
+              .y(function(d, i) { return y5(d); });
+
+            var svg5 = d3.select(".chart5")
+              .attr("width", width5 + margin5.left + margin5.right)
+              .attr("height", height5 + margin5.top + margin5.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin5.left + "," + margin5.top + ")");
+
+            svg5.append("defs").append("clipPath")
+              .attr("id", "clip5")
+              .append("rect")
+              .attr("width", width5)
+              .attr("height", height5);
+
+            svg5.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + y5(0) + ")")
+              .call(d3.svg.axis().scale(x5).orient("bottom"));
+
+            svg5.append("g")
+              .attr("class", "y axis")
+              .call(d3.svg.axis().scale(y5).orient("left"));
+
+            var path5 = svg5.append("g")
+              .attr("clip-path", "url(#clip5)")
+              .append("path")
+              .datum(data5)
+              .attr("class", "line")
+              .attr("d", line5);
+
+            function resize5() {
+
+
+              // Computes the new dimensions
+              var width5 = $( "#the-list_5" ).width() - margin5.left - margin5.right,
+              height5 = 200 - margin5.top - margin5.bottom;
+
+              x5 = d3.scale.linear()
+                .domain([0, n5 - 1])
+                .range([0, width5]);  
+
+              // Removes the existing graph
+              svg5.selectAll("*").remove();
+              
+
+              // Redraws the existing graph
+              svg5.attr("width", width5 + margin5.left + margin5.right)
+                .attr("height", height5 + margin5.top + margin5.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin5.left + "," + margin5.top + ")");
+
+              svg5.append("defs").append("clipPath")
+                .attr("id", "clip5")
+                .append("rect")
+                .attr("width", width5)
+                .attr("height", height5);
+
+              svg5.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + y5(0) + ")")
+                .call(d3.svg.axis().scale(x5).orient("bottom"));
+
+              svg5.append("g")
+                .attr("class", "y axis")
+                .call(d3.svg.axis().scale(y5).orient("left"));
+
+              var path5 = svg5.append("g")
+                .attr("clip-path", "url(#clip5)")
+                .append("path")
+                .datum(data5)
+                .attr("class", "line")
+                .attr("d", line5);
+
+            }
+
+            d3.select(window).on('resize', resize5); 
+
+            function updateCharts_5(key, value) {
+
+              // push a new data point onto the back
+              data5.push(value);
+
+              // redraw line and slide it to the left
+              path5
+                .attr("d", line5)
+                .attr("transform", null)
+                .transition()
+                .duration(500)
+                .ease("linear")
+                .attr("transform", "translate(" + x5(-1) + ",0)")
+
+              data5.shift();
+
+            }
+
+            </script>
+          
+
+	  <script>
+
+	    var url_5 = 'wss://ws.evrythng.com:443/thngs/'+thngId_5+'/properties?access_token='+key;
+	    var socket_5 = new WebSocket(url_5); 
+	    socket_5.onmessage = function (message) { 
+  	      var content_5 = JSON.parse(message.data);
+  	      console.log('Property update : ', content_5[0]); 
+	      if (content_5[0].key === 'status') {
+  	        $('#value-'+content_5[0].key+'_5').html( content_5[0].value ); 
+	        if (content_5[0].value === true) {
+		  updateCharts_5("status", 1);
+	 	  document.getElementById("value-status_5").innerHTML = "true";
+		  document.getElementById("led5").style.color = "LawnGreen";
+	        } else if (content_5[0].value === false) {
+		  updateCharts_5("status", 0);
+		  document.getElementById("value-status_5").innerHTML = "false";
+		  document.getElementById("led5").style.color = "grey";
+	        }
+	      }
+	    };
+	    socket_5.onerror = function (error) {
+    	      console.log('An error occurred while trying to connect to a WebSocket!');
+    	      console.log(error);
+	    };
+ 
+            </script>
+
+	    <script>
+
+	      function sendAction_5(type,value){ 
+  	        console.log(" You are here: ("+latitude+","+longitude+")");
+  		$.ajax({ 
+      		  url: 'https://api.evrythng.com/actions/'+type+'?access_token='+key,
+      		  dataType: 'json', 
+      		  type: 'post', 
+      		  contentType: 'application/json', 
+      		  data: JSON.stringify({"type": type, "thng": thngId_5, "customFields":value,"location":{"position":{"type": "Point","coordinates": [longitude, latitude]}},"locationSource":"sensor"}), 
+      		  processData: false, 
+      		  success: function( data, textStatus, jQxhr ){ 
+          	    $('#response_5 pre').html( JSON.stringify( data ) ); 
+      		  }, 
+      		  error: function( jqXhr, textStatus, errorThrown ){
+          	    console.log( errorThrown ); 
+      		  } 
+  		});
+	      }
+
+            </script>
+
+        </div>
+
+      </div>
+
+      <div class="col-md-6" id="the-list_6" role="main">
+        
+	<div class="bs-docs-section">
+
+          <h2>WoT LED 6 <i id="led6" class="fa fa-circle" style="font-size:36px;color:grey"></i></h2>
+
+	  <hr>
+
+	  <h3>Actions</h3>
+          <div>
+   	    <h5>_setStatus</h5>
+	    <input type="checkbox" id="toggle-status_6"/>
+
+	    <script>
+	      $(function() {
+                $('#toggle-status_6').bootstrapToggle({
+                  on: 'On',
+                  off: 'Off'
+                });
+              });
+              $(function() {
+                $('#toggle-status_6').change(function() {
+                  sendAction_6("_setStatus",{"status": $(this).prop('checked')});
+                });
+              });
+            </script>
+
+          </div>
+
+	  
+
+	  <hr>
+
+	  <h3>Properties</h3>
+
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span id="value-status_6" class="badge">false</span>
+              status
+            </li>
+          </ul>
+
+	  <svg class="chart6"></svg>
+
+	  <script>
+
+	    var myVar6 = setInterval(runupdate6, 1000);
+
+	    function runupdate6() {
+	      var vs = document.getElementById("value-status_6").innerHTML;
+	      if (vs === "true") {
+		 updateCharts_6("status", 1);
+	      } else if (vs === "false") {
+		 updateCharts_6("status", 0);
+	      };
+	    }
+		
+            var n6 = 40,
+              random6 = d3.random.normal(0, 0),
+              data6 = d3.range(n6).map(random6);
+
+            var margin6 = {top: 40, right: 40, bottom: 40, left: 50},
+              width6 = $( "#the-list_6" ).width() - margin6.left - margin6.right,
+              height6 = 200 - margin6.top - margin6.bottom;
+
+            var x6 = d3.scale.linear()
+              .domain([0, n6 - 1])
+              .range([0, width6]);
+
+            var y6 = d3.scale.linear()
+              .domain([0, 1.5])
+              .range([height6, 0]);
+
+            var line6 = d3.svg.line()
+              .x(function(d, i) { return x6(i); })
+              .y(function(d, i) { return y6(d); });
+
+            var svg6 = d3.select(".chart6")
+              .attr("width", width6 + margin6.left + margin6.right)
+              .attr("height", height6 + margin6.top + margin6.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin6.left + "," + margin6.top + ")");
+
+            svg6.append("defs").append("clipPath")
+              .attr("id", "clip6")
+              .append("rect")
+              .attr("width", width6)
+              .attr("height", height6);
+
+            svg6.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + y6(0) + ")")
+              .call(d3.svg.axis().scale(x6).orient("bottom"));
+
+            svg6.append("g")
+              .attr("class", "y axis")
+              .call(d3.svg.axis().scale(y6).orient("left"));
+
+            var path6 = svg6.append("g")
+              .attr("clip-path", "url(#clip6)")
+              .append("path")
+              .datum(data6)
+              .attr("class", "line")
+              .attr("d", line6);
+
+            function resize6() {
+
+
+              // Computes the new dimensions
+              var width6 = $( "#the-list_6" ).width() - margin6.left - margin6.right,
+              height6 = 200 - margin6.top - margin6.bottom;
+
+              x6 = d3.scale.linear()
+                .domain([0, n6 - 1])
+                .range([0, width6]);  
+
+              // Removes the existing graph
+              svg6.selectAll("*").remove();
+              
+
+              // Redraws the existing graph
+              svg6.attr("width", width6 + margin6.left + margin6.right)
+                .attr("height", height6 + margin6.top + margin6.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin6.left + "," + margin6.top + ")");
+
+              svg6.append("defs").append("clipPath")
+                .attr("id", "clip6")
+                .append("rect")
+                .attr("width", width6)
+                .attr("height", height6);
+
+              svg6.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + y6(0) + ")")
+                .call(d3.svg.axis().scale(x6).orient("bottom"));
+
+              svg6.append("g")
+                .attr("class", "y axis")
+                .call(d3.svg.axis().scale(y6).orient("left"));
+
+              var path6 = svg6.append("g")
+                .attr("clip-path", "url(#clip6)")
+                .append("path")
+                .datum(data6)
+                .attr("class", "line")
+                .attr("d", line6);
+
+            }
+
+            d3.select(window).on('resize', resize6); 
+
+            function updateCharts_6(key, value) {
+
+              // push a new data point onto the back
+              data6.push(value);
+
+              // redraw line and slide it to the left
+              path6
+                .attr("d", line6)
+                .attr("transform", null)
+                .transition()
+                .duration(500)
+                .ease("linear")
+                .attr("transform", "translate(" + x6(-1) + ",0)")
+
+              data6.shift();
+
+            }
+
+            </script>
+
+	  <script>
+
+	    var url_6 = 'wss://ws.evrythng.com:443/thngs/'+thngId_6+'/properties?access_token='+key;
+	    var socket_6 = new WebSocket(url_6); 
+	    socket_6.onmessage = function (message) { 
+  	      var content_6 = JSON.parse(message.data);
+  	      console.log('Property update : ', content_6[0]); 
+	      if (content_6[0].key === 'status') {
+  	        $('#value-'+content_6[0].key+'_6').html( content_6[0].value ); 
+	        if (content_6[0].value === true) {
+		  document.getElementById("value-status_6").innerHTML = "true";
+		  document.getElementById("led6").style.color = "LawnGreen";
+	        } else if (content_6[0].value === false) {
+		  document.getElementById("value-status_6").innerHTML = "false";
+		  document.getElementById("led6").style.color = "grey";
+	        }
+	      }
+	    };
+	    socket_6.onerror = function (error) {
+    	      console.log('An error occurred while trying to connect to a WebSocket!');
+    	      console.log(error);
+	    };
+ 
+            </script>
+
+	    <script>
+		
+	      function sendAction_6(type,value){ 
+  	        console.log(" You are here: ("+latitude+","+longitude+")");
+  		$.ajax({ 
+      		  url: 'https://api.evrythng.com/actions/'+type+'?access_token='+key,
+      		  dataType: 'json', 
+      		  type: 'post', 
+      		  contentType: 'application/json', 
+      		  data: JSON.stringify({"type": type, "thng": thngId_6, "customFields":value,"location":{"position":{"type": "Point","coordinates": [longitude, latitude]}},"locationSource":"sensor"}), 
+      		  processData: false, 
+      		  success: function( data, textStatus, jQxhr ){ 
+          	    $('#response_6 pre').html( JSON.stringify( data ) ); 
+      		  }, 
+      		  error: function( jqXhr, textStatus, errorThrown ){
+          	    console.log( errorThrown ); 
+      		  } 
+  		});
+	      }
+
+            </script>
+
+        </div>
+
+      </div>   
+
+    </div>
+
+    <br>
+    <br>
+
+    <div class="row">
+      <div class="col-md-6" id="the-list_7" role="main">
+        
+	<div class="bs-docs-section">
+
+          <h2>WoT LED 7 <i id="led7" class="fa fa-circle" style="font-size:36px;color:grey"></i> </h2>
+
+	  <hr>
+
+	  <h3>Actions</h3>
+          <div>
+   	    <h5>_setStatus</h5>
+	    <input type="checkbox" id="toggle-status_7"/>
+
+	    <script>
+	      $(function() {
+                $('#toggle-status_7').bootstrapToggle({
+                  on: 'On',
+                  off: 'Off'
+                });
+              });
+              $(function() {
+                $('#toggle-status_7').change(function() {
+                  sendAction_7("_setStatus",{"status": $(this).prop('checked')});
+                });
+              });
+            </script>
+
+          </div>
+
+	  
+
+	  <hr>
+
+	  <h3>Properties</h3>
+
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span id="value-status_7" class="badge">false</span>
+              status
+            </li>
+          </ul>
+
+          <svg class="chart7"></svg>
+
+	  <script>
+
+	    var myVar7 = setInterval(runupdate7, 1000);
+
+	    function runupdate7() {
+	      var vs = document.getElementById("value-status_7").innerHTML;
+	      if (vs === "true") {
+		 updateCharts_7("status", 1);
+	      } else if (vs === "false") {
+		 updateCharts_7("status", 0);
+	      };
+	    }
+		
+            var n7 = 40,
+              random7 = d3.random.normal(0, 0),
+              data7 = d3.range(n7).map(random7);
+
+            var margin7 = {top: 40, right: 40, bottom: 40, left: 50},
+              width7 = $( "#the-list_7" ).width() - margin7.left - margin7.right,
+              height7 = 200 - margin7.top - margin7.bottom;
+
+            var x7 = d3.scale.linear()
+              .domain([0, n7 - 1])
+              .range([0, width7]);
+
+            var y7 = d3.scale.linear()
+              .domain([0, 1.5])
+              .range([height7, 0]);
+
+            var line7 = d3.svg.line()
+              .x(function(d, i) { return x7(i); })
+              .y(function(d, i) { return y7(d); });
+
+            var svg7 = d3.select(".chart7")
+              .attr("width", width7 + margin7.left + margin7.right)
+              .attr("height", height7 + margin7.top + margin7.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin7.left + "," + margin7.top + ")");
+
+            svg7.append("defs").append("clipPath")
+              .attr("id", "clip7")
+              .append("rect")
+              .attr("width", width7)
+              .attr("height", height7);
+
+            svg7.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + y7(0) + ")")
+              .call(d3.svg.axis().scale(x7).orient("bottom"));
+
+            svg7.append("g")
+              .attr("class", "y axis")
+              .call(d3.svg.axis().scale(y7).orient("left"));
+
+            var path7 = svg7.append("g")
+              .attr("clip-path", "url(#clip7)")
+              .append("path")
+              .datum(data7)
+              .attr("class", "line")
+              .attr("d", line7);
+
+            function resize7() {
+
+
+              // Computes the new dimensions
+              var width7 = $( "#the-list_7" ).width() - margin7.left - margin7.right,
+              height7 = 200 - margin7.top - margin7.bottom;
+
+              x7 = d3.scale.linear()
+                .domain([0, n7 - 1])
+                .range([0, width7]);  
+
+              // Removes the existing graph
+              svg7.selectAll("*").remove();
+              
+
+              // Redraws the existing graph
+              svg7.attr("width", width7 + margin7.left + margin7.right)
+                .attr("height", height7 + margin7.top + margin7.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin7.left + "," + margin7.top + ")");
+
+              svg7.append("defs").append("clipPath")
+                .attr("id", "clip7")
+                .append("rect")
+                .attr("width", width7)
+                .attr("height", height7);
+
+              svg7.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + y7(0) + ")")
+                .call(d3.svg.axis().scale(x7).orient("bottom"));
+
+              svg7.append("g")
+                .attr("class", "y axis")
+                .call(d3.svg.axis().scale(y7).orient("left"));
+
+              var path7 = svg7.append("g")
+                .attr("clip-path", "url(#clip7)")
+                .append("path")
+                .datum(data7)
+                .attr("class", "line")
+                .attr("d", line7);
+
+            }
+
+            d3.select(window).on('resize', resize7); 
+
+            function updateCharts_7(key, value) {
+
+              // push a new data point onto the back
+              data7.push(value);
+
+              // redraw line and slide it to the left
+              path7
+                .attr("d", line7)
+                .attr("transform", null)
+                .transition()
+                .duration(500)
+                .ease("linear")
+                .attr("transform", "translate(" + x7(-1) + ",0)")
+
+              data7.shift();
+
+            }
+
+            </script>
+          
+
+	  <script>
+
+	    var url_7 = 'wss://ws.evrythng.com:443/thngs/'+thngId_7+'/properties?access_token='+key;
+	    var socket_7 = new WebSocket(url_7); 
+	    socket_7.onmessage = function (message) { 
+  	      var content_7 = JSON.parse(message.data);
+  	      console.log('Property update : ', content_7[0]); 
+	      if (content_7[0].key === 'status') {
+  	        $('#value-'+content_7[0].key+'_7').html( content_7[0].value ); 
+	        if (content_7[0].value === true) {
+		  updateCharts_7("status", 1);
+	 	  document.getElementById("value-status_7").innerHTML = "true";
+		  document.getElementById("led7").style.color = "LawnGreen";
+	        } else if (content_7[0].value === false) {
+		  updateCharts_7("status", 0);
+		  document.getElementById("value-status_7").innerHTML = "false";
+		  document.getElementById("led7").style.color = "grey";
+	        }
+	      }
+	    };
+	    socket_7.onerror = function (error) {
+    	      console.log('An error occurred while trying to connect to a WebSocket!');
+    	      console.log(error);
+	    };
+ 
+            </script>
+
+	    <script>
+
+	      function sendAction_7(type,value){ 
+  	        console.log(" You are here: ("+latitude+","+longitude+")");
+  		$.ajax({ 
+      		  url: 'https://api.evrythng.com/actions/'+type+'?access_token='+key,
+      		  dataType: 'json', 
+      		  type: 'post', 
+      		  contentType: 'application/json', 
+      		  data: JSON.stringify({"type": type, "thng": thngId_7, "customFields":value,"location":{"position":{"type": "Point","coordinates": [longitude, latitude]}},"locationSource":"sensor"}), 
+      		  processData: false, 
+      		  success: function( data, textStatus, jQxhr ){ 
+          	    $('#response_7 pre').html( JSON.stringify( data ) ); 
+      		  }, 
+      		  error: function( jqXhr, textStatus, errorThrown ){
+          	    console.log( errorThrown ); 
+      		  } 
+  		});
+	      }
+
+            </script>
+
+        </div>
+
+      </div>
+
+      <div class="col-md-6" id="the-list_8" role="main">
+        
+	<div class="bs-docs-section">
+
+          <h2>WoT LED 8 <i id="led8" class="fa fa-circle" style="font-size:36px;color:grey"></i></h2>
+
+	  <hr>
+
+	  <h3>Actions</h3>
+          <div>
+   	    <h5>_setStatus</h5>
+	    <input type="checkbox" id="toggle-status_8"/>
+
+	    <script>
+	      $(function() {
+                $('#toggle-status_8').bootstrapToggle({
+                  on: 'On',
+                  off: 'Off'
+                });
+              });
+              $(function() {
+                $('#toggle-status_8').change(function() {
+                  sendAction_8("_setStatus",{"status": $(this).prop('checked')});
+                });
+              });
+            </script>
+
+          </div>
+
+	  
+
+	  <hr>
+
+	  <h3>Properties</h3>
+
+          <ul class="list-group">
+            <li class="list-group-item">
+              <span id="value-status_8" class="badge">false</span>
+              status
+            </li>
+          </ul>
+
+	  <svg class="chart8"></svg>
+
+	  <script>
+
+	    var myVar8 = setInterval(runupdate8, 1000);
+
+	    function runupdate8() {
+	      var vs = document.getElementById("value-status_8").innerHTML;
+	      if (vs === "true") {
+		 updateCharts_8("status", 1);
+	      } else if (vs === "false") {
+		 updateCharts_8("status", 0);
+	      };
+	    }
+		
+            var n8 = 40,
+              random8 = d3.random.normal(0, 0),
+              data8 = d3.range(n8).map(random8);
+
+            var margin8 = {top: 40, right: 40, bottom: 40, left: 50},
+              width8 = $( "#the-list_8" ).width() - margin8.left - margin8.right,
+              height8 = 200 - margin8.top - margin8.bottom;
+
+            var x8 = d3.scale.linear()
+              .domain([0, n8 - 1])
+              .range([0, width8]);
+
+            var y8 = d3.scale.linear()
+              .domain([0, 1.5])
+              .range([height8, 0]);
+
+            var line8 = d3.svg.line()
+              .x(function(d, i) { return x8(i); })
+              .y(function(d, i) { return y8(d); });
+
+            var svg8 = d3.select(".chart8")
+              .attr("width", width8 + margin8.left + margin8.right)
+              .attr("height", height8 + margin8.top + margin8.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin8.left + "," + margin8.top + ")");
+
+            svg8.append("defs").append("clipPath")
+              .attr("id", "clip8")
+              .append("rect")
+              .attr("width", width8)
+              .attr("height", height8);
+
+            svg8.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + y8(0) + ")")
+              .call(d3.svg.axis().scale(x8).orient("bottom"));
+
+            svg8.append("g")
+              .attr("class", "y axis")
+              .call(d3.svg.axis().scale(y8).orient("left"));
+
+            var path8 = svg8.append("g")
+              .attr("clip-path", "url(#clip8)")
+              .append("path")
+              .datum(data8)
+              .attr("class", "line")
+              .attr("d", line8);
+
+            function resize8() {
+
+
+              // Computes the new dimensions
+              var width8 = $( "#the-list_4" ).width() - margin8.left - margin8.right,
+              height8 = 200 - margin8.top - margin8.bottom;
+
+              x8 = d3.scale.linear()
+                .domain([0, n8 - 1])
+                .range([0, width8]);  
+
+              // Removes the existing graph
+              svg8.selectAll("*").remove();
+              
+
+              // Redraws the existing graph
+              svg8.attr("width", width8 + margin8.left + margin8.right)
+                .attr("height", height8 + margin8.top + margin8.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin8.left + "," + margin8.top + ")");
+
+              svg8.append("defs").append("clipPath")
+                .attr("id", "clip8")
+                .append("rect")
+                .attr("width", width8)
+                .attr("height", height8);
+
+              svg8.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + y8(0) + ")")
+                .call(d3.svg.axis().scale(x8).orient("bottom"));
+
+              svg8.append("g")
+                .attr("class", "y axis")
+                .call(d3.svg.axis().scale(y8).orient("left"));
+
+              var path8 = svg8.append("g")
+                .attr("clip-path", "url(#clip8)")
+                .append("path")
+                .datum(data8)
+                .attr("class", "line")
+                .attr("d", line8);
+
+            }
+
+            d3.select(window).on('resize', resize8); 
+
+            function updateCharts_8(key, value) {
+
+              // push a new data point onto the back
+              data8.push(value);
+
+              // redraw line and slide it to the left
+              path8
+                .attr("d", line8)
+                .attr("transform", null)
+                .transition()
+                .duration(500)
+                .ease("linear")
+                .attr("transform", "translate(" + x8(-1) + ",0)")
+
+              data8.shift();
+
+            }
+
+            </script>
+
+	  <script>
+
+	    var url_8 = 'wss://ws.evrythng.com:443/thngs/'+thngId_8+'/properties?access_token='+key;
+	    var socket_8 = new WebSocket(url_8); 
+	    socket_8.onmessage = function (message) { 
+  	      var content_8 = JSON.parse(message.data);
+  	      console.log('Property update : ', content_8[0]); 
+	      if (content_8[0].key === 'status') {
+  	        $('#value-'+content_8[0].key+'_8').html( content_8[0].value ); 
+	        if (content_8[0].value === true) {
+		  document.getElementById("value-status_8").innerHTML = "true";
+		  document.getElementById("led8").style.color = "LawnGreen";
+	        } else if (content_8[0].value === false) {
+		  document.getElementById("value-status_8").innerHTML = "false";
+		  document.getElementById("led8").style.color = "grey";
+	        }
+	      }
+	    };
+	    socket_8.onerror = function (error) {
+    	      console.log('An error occurred while trying to connect to a WebSocket!');
+    	      console.log(error);
+	    };
+ 
+            </script>
+
+	    <script>
+		
+	      function sendAction_8(type,value){ 
+  	        console.log(" You are here: ("+latitude+","+longitude+")");
+  		$.ajax({ 
+      		  url: 'https://api.evrythng.com/actions/'+type+'?access_token='+key,
+      		  dataType: 'json', 
+      		  type: 'post', 
+      		  contentType: 'application/json', 
+      		  data: JSON.stringify({"type": type, "thng": thngId_8, "customFields":value,"location":{"position":{"type": "Point","coordinates": [longitude, latitude]}},"locationSource":"sensor"}), 
+      		  processData: false, 
+      		  success: function( data, textStatus, jQxhr ){ 
+          	    $('#response_8 pre').html( JSON.stringify( data ) ); 
+      		  }, 
+      		  error: function( jqXhr, textStatus, errorThrown ){
+          	    console.log( errorThrown ); 
+      		  } 
+  		});
+	      }
+
+            </script>
+
+        </div>
+
+      </div>   
+
+    </div>
+
+    <footer class="bs-docs-footer" role="contentinfo">
+      <div class="container">
+
+        <p>Built with the amazing D3, Bootstrap, and bootstraptoggle.</p>
+
+      </div>
+    </footer>
+
+  
+  </div>
+
+</body>
+
+</html>
+
+
+
+
+
+
