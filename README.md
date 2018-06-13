@@ -32,6 +32,10 @@ In order to retrieve the response in **JSON** instead of **HTML**, you need to t
 
 The only thing to do is to append "*/pi*" (for single device), "*/sensors*" (for list of sensors), "*/temperature*" (for a sensor), "*/value*" (just for the value of the data) to the URL in the [Postman](https://www.getpostman.com/) and click **`Send`** button again.
 
+## Simple WoT demonstration
+
+Here I demonstrate how to implement WoT technique on LEDs On/Off control. The index file for website can been seen [here](https://github.com/DerekYJC/smartWoT).
+
 ## Acknowledgments
 
 Thanks for the contribution of the book, "[building the **web of things**](https://webofthings.org/book/)"* by Dominique D. Guinard and Vlad M. Trifa, which provides simple but important examples and step-by-step tutorials for the beginners.
