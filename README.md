@@ -34,7 +34,9 @@ The only thing to do is to append "*/pi*" (for single device), "*/sensors*" (for
 
 ## Simple WoT demonstration
 
-Here I demonstrate how to implement WoT technique on LEDs On/Off control. The index file for website can been seen [here](https://github.com/DerekYJC/smartWoT).
+Here I demonstrate how to implement WoT technique on LEDs On/Off control. 
+
+All the example codes being used for demonstration can been seen under the folder [*'example'*](./example).
 
 ## Acknowledgments
 
